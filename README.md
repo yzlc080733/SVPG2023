@@ -37,6 +37,8 @@ pip install vizdoom==1.1.14
 
 * For convenience in modifying the Gym InvertedPendulum environment, we included a copy of the Gym library [gym/gym at 0.26.2 · openai/gym · GitHub](https://github.com/openai/gym/tree/0.26.2/gym). If you choose to download the Gym library separately, you can use `python prepare_gymip.py` to make the modification.
 
+* We use the environment definitions of Health Gathering from ViZDoom[ViZDoom/scenarios at master · Farama-Foundation/ViZDoom · GitHub](https://github.com/Farama-Foundation/ViZDoom/tree/master/scenarios). The files are in `./DOOM/env/doom_hg/`.
+
 ## Running the code
 
 ### Notes
