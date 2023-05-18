@@ -169,8 +169,8 @@ if __name__ == "__main__":
     from spikingjelly.clock_driven.ann2snn import parser, classify_simulator
     from spikingjelly.clock_driven import functional
     print('\033[91m CONVERT\033[0m')
-    model_name = 'model_convert_rep%d' % (args.seed)
-    log_dir_temp = './ANN2SNN/temp_log_dir_rep%d/' % (args.seed)
+    model_name = 'model_convert_rep%s' % (EXP_NAME)
+    log_dir_temp = './ANN2SNN/temp_log_dir_%s/' % (EXP_NAME)
     parser_device = torch_device
     simulator_device = parser_device
     # -----generate data-----
@@ -202,95 +202,95 @@ if __name__ == "__main__":
     
     # ~~~~~~~~~~~~~~~~~~~~TEST~~~~~~~~~~~~~~~~~~~~~~~~~~
     log_text(File, 'test', str(datetime.datetime.now()))
-    # ~~~~~~~~~~~~~~~~~~~~TEST ADVERSARIAL~~~~~~~~~~~~~~
-    import model_adversarial
-    ad_mem_size = 1000
-    if args.task in ['mnist', 'cifar10']:
-        ad_train_epi_num = 500
-    else:               # 'vizdoom'
-        ad_train_epi_num = 100 ###################################################################
-    ad_mem_s = torch.zeros([ad_mem_size, input_dimension]).to(torch_device)
-    ad_mem_a = torch.zeros([ad_mem_size, output_dimension]).to(torch_device)
-    ad_model = model_adversarial.Adversarial(input_dimension, output_dimension)
-    ad_model = ad_model.to(torch_device)
-    pointer, total_num = 0, 0
+    # # ~~~~~~~~~~~~~~~~~~~~TEST ADVERSARIAL~~~~~~~~~~~~~~
+    # import model_adversarial
+    # ad_mem_size = 1000
+    # if args.task in ['mnist', 'cifar10']:
+    #     ad_train_epi_num = 500
+    # else:               # 'vizdoom'
+    #     ad_train_epi_num = 100 ###################################################################
+    # ad_mem_s = torch.zeros([ad_mem_size, input_dimension]).to(torch_device)
+    # ad_mem_a = torch.zeros([ad_mem_size, output_dimension]).to(torch_device)
+    # ad_model = model_adversarial.Adversarial(input_dimension, output_dimension)
+    # ad_model = ad_model.to(torch_device)
+    # pointer, total_num = 0, 0
 
-    # -----load--------------
-    snn = torch.load(os.path.join(log_dir_temp, 'snn_' + model_name + '.pkl')).to(torch_device)
-    sim = classify_simulator(snn, log_dir=log_dir_temp + 'simulator', device=simulator_device)
+    # # -----load--------------
+    # snn = torch.load(os.path.join(log_dir_temp, 'snn_' + model_name + '.pkl')).to(torch_device)
+    # sim = classify_simulator(snn, log_dir=log_dir_temp + 'simulator', device=simulator_device)
 
-    for collect_epi_i in range(ad_train_epi_num):
-        env.init_train()
-        for collect_step_i in range(env.max_step_num):
-            observation = env.get_train_observation(batch_size=train_batch_size)
+    # for collect_epi_i in range(ad_train_epi_num):
+    #     env.init_train()
+    #     for collect_step_i in range(env.max_step_num):
+    #         observation = env.get_train_observation(batch_size=train_batch_size)
             
-            # -----spike-------------
-            with torch.no_grad():
-                functional.reset_net(snn)
-                for snn_t in range(args.snn_num_steps):
-                    enc = sim.encoder(observation).float()
-                    out = snn(enc)
-                    if snn_t == 0:
-                        counter = out
-                    else:
-                        counter = counter + out
-            model_output = counter
+    #         # -----spike-------------
+    #         with torch.no_grad():
+    #             functional.reset_net(snn)
+    #             for snn_t in range(args.snn_num_steps):
+    #                 enc = sim.encoder(observation).float()
+    #                 out = snn(enc)
+    #                 if snn_t == 0:
+    #                     counter = out
+    #                 else:
+    #                     counter = counter + out
+    #         model_output = counter
 
-            action_chosen_index = torch.argmax(model_output, dim=1)
-            action_chosen_onehot = torch.nn.functional.one_hot(action_chosen_index, num_classes=env.action_num)
-            reward, _ = env.make_action(action_chosen_onehot)
-            for sample_i in range(observation.shape[0]):
-                ad_mem_s[pointer, :] = observation[sample_i, :]
-                ad_mem_a[pointer, :] = action_chosen_onehot[sample_i, :]
-                pointer = (pointer + 1) % ad_mem_size
-                total_num = min(ad_mem_size, total_num + 1)
-            if env.done_signal == True:
-                break
-        sample_list = random.sample(range(0, total_num), min(total_num, 200))
-        ad_s_batch = ad_mem_s[sample_list]
-        ad_a_batch = ad_mem_a[sample_list]
-        ad_predict = ad_model(ad_s_batch)
-        ad_loss = ad_model.learn(ad_s_batch, ad_predict, ad_a_batch)
-        log_text(File, 'ADtrain', '%8d,   %8.6f' % (collect_epi_i, ad_loss))
-    perturb_loss = nn.CrossEntropyLoss()
+    #         action_chosen_index = torch.argmax(model_output, dim=1)
+    #         action_chosen_onehot = torch.nn.functional.one_hot(action_chosen_index, num_classes=env.action_num)
+    #         reward, _ = env.make_action(action_chosen_onehot)
+    #         for sample_i in range(observation.shape[0]):
+    #             ad_mem_s[pointer, :] = observation[sample_i, :]
+    #             ad_mem_a[pointer, :] = action_chosen_onehot[sample_i, :]
+    #             pointer = (pointer + 1) % ad_mem_size
+    #             total_num = min(ad_mem_size, total_num + 1)
+    #         if env.done_signal == True:
+    #             break
+    #     sample_list = random.sample(range(0, total_num), min(total_num, 200))
+    #     ad_s_batch = ad_mem_s[sample_list]
+    #     ad_a_batch = ad_mem_a[sample_list]
+    #     ad_predict = ad_model(ad_s_batch)
+    #     ad_loss = ad_model.learn(ad_s_batch, ad_predict, ad_a_batch)
+    #     log_text(File, 'ADtrain', '%8d,   %8.6f' % (collect_epi_i, ad_loss))
+    # perturb_loss = nn.CrossEntropyLoss()
     
-    for epsilon in np.arange(0, 0.2, 0.01):
-        test_preformance_list = []
-        for test_epi_i in range(args.test_num):
-            env.init_test()
-            for test_step_i in range(env.max_step_num):
-                observation = env.get_test_observation(batch_size=test_batch_size)
-                observation.requires_grad = True            # for FGSM
-                ad_output = ad_model(observation)
-                ad_argmax = torch.argmax(ad_output, dim=1)
-                perturb_loss_value = perturb_loss(ad_output, ad_argmax).mean()
-                ad_model.zero_grad()
-                perturb_loss_value.backward()
-                observation_grad = observation.grad.data
-                sign_grad = observation_grad.sign()
-                observation_perturb = observation + epsilon * sign_grad
+    # for epsilon in np.arange(0, 0.2, 0.01):
+    #     test_preformance_list = []
+    #     for test_epi_i in range(args.test_num):
+    #         env.init_test()
+    #         for test_step_i in range(env.max_step_num):
+    #             observation = env.get_test_observation(batch_size=test_batch_size)
+    #             observation.requires_grad = True            # for FGSM
+    #             ad_output = ad_model(observation)
+    #             ad_argmax = torch.argmax(ad_output, dim=1)
+    #             perturb_loss_value = perturb_loss(ad_output, ad_argmax).mean()
+    #             ad_model.zero_grad()
+    #             perturb_loss_value.backward()
+    #             observation_grad = observation.grad.data
+    #             sign_grad = observation_grad.sign()
+    #             observation_perturb = observation + epsilon * sign_grad
 
-                # -----spike-------------
-                with torch.no_grad():
-                    functional.reset_net(snn)
-                    for snn_t in range(args.snn_num_steps):
-                        enc = sim.encoder(observation_perturb).float()
-                        out = snn(enc)
-                        if snn_t == 0:
-                            counter = out
-                        else:
-                            counter = counter + out
-                model_output = counter
+    #             # -----spike-------------
+    #             with torch.no_grad():
+    #                 functional.reset_net(snn)
+    #                 for snn_t in range(args.snn_num_steps):
+    #                     enc = sim.encoder(observation_perturb).float()
+    #                     out = snn(enc)
+    #                     if snn_t == 0:
+    #                         counter = out
+    #                     else:
+    #                         counter = counter + out
+    #             model_output = counter
                 
-                action_chosen_index = torch.argmax(model_output, dim=1)
-                action_chosen_onehot = torch.nn.functional.one_hot(action_chosen_index, num_classes=env.action_num)
-                reward, test_other_step_record = env.make_action(action_chosen_onehot)
-                if env.done_signal == True:
-                    break
-            test_preformance_list.append(test_other_step_record[0])
-        test_performance_mean = sum(test_preformance_list) / len(test_preformance_list)
-        log_text(File, 'FGSM', '%8.6f,   %8.6f' % (epsilon, test_performance_mean))
-        File.flush()
+    #             action_chosen_index = torch.argmax(model_output, dim=1)
+    #             action_chosen_onehot = torch.nn.functional.one_hot(action_chosen_index, num_classes=env.action_num)
+    #             reward, test_other_step_record = env.make_action(action_chosen_onehot)
+    #             if env.done_signal == True:
+    #                 break
+    #         test_preformance_list.append(test_other_step_record[0])
+    #     test_performance_mean = sum(test_preformance_list) / len(test_preformance_list)
+    #     log_text(File, 'FGSM', '%8.6f,   %8.6f' % (epsilon, test_performance_mean))
+    #     File.flush()
 
 
     # >>>> Test Weight REL
