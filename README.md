@@ -22,7 +22,7 @@ pip install torch==1.13 numpy==1.19 matplotlib
 pip install scikit-image scikit-learn
 pip install opencv-python==4.7.0 protobuf==3.20.0
 # ANN2SNN related
-pip install spikingkelly==0.0.0.0.8 onnx==1.8.0 onnxruntime==1.10.0
+pip install spikingjelly==0.0.0.0.8 onnx==1.8.0 onnxruntime==1.10.0
 # BPTT related
 pip install snntorch==0.5.3
 # GYMIP related
