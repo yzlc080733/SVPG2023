@@ -29,6 +29,7 @@ def get_arguments():
     parser.add_argument('--entropy', type=float, default=0.02)
     parser.add_argument('--target_network_freq', type=int, default=100)
     parser.add_argument('--cuda', type=int, default=-1)
+    parser.add_argument('--thread', type=int, default=-1)
     parser.add_argument('--PPO_epochs', type=int, default=10)
     parser.add_argument('--eps_clip', type=float, default=0.2)
 
@@ -106,6 +107,11 @@ if __name__ == "__main__":
     # -----cuda device-------
     if args.cuda < 0:
         torch_device = torch.device('cpu')
+        os.environ['CUDA_VISIBLE_DEVICES'] = ''
+        if args.thread == -1:
+            pass
+        else:
+            torch.set_num_threads(args.thread)
     else:
         os.environ['CUDA_VISIBLE_DEVICES'] = '%1d' % args.cuda
         torch_device = torch.device('cuda:0')
@@ -156,14 +162,14 @@ if __name__ == "__main__":
 
     # -----init timer--------
     log_text_flush_time = time.time()
-    model.load_model(EXP_NAME + '_best')
+    model = model.to(torch_device)
+    model.load_model(EXP_NAME + '_best', device=torch_device)
     # -----log file----------
     log_filename = './ANN2SNN/log_text/log_' + EXP_NAME + '.txt'
     File = open(log_filename, 'w')
     log_text(File, 'init_ANN2SNN', str(datetime.datetime.now()))
     log_text(File, 'arguments', str(args))
 
-    model = model.to(torch_device)
 
     # ~~~~~~~~~~~~~~~~~~~~CONVERT~~~~~~~~~~~~~~~~~~~~~~~
     from spikingjelly.clock_driven.ann2snn import parser, classify_simulator
@@ -172,7 +178,7 @@ if __name__ == "__main__":
     model_name = 'model_convert_rep%s' % (EXP_NAME)
     log_dir_temp = './ANN2SNN/temp_log_dir_%s/' % (EXP_NAME)
     parser_device = torch_device
-    simulator_device = parser_device
+    simulator_device = torch_device
     # -----generate data-----
     norm_data_list = []
     while True:
@@ -358,9 +364,9 @@ if __name__ == "__main__":
                 with torch.no_grad():
                     for param in snn.parameters():
                         if noise_type == 'gaussian':
-                            param.add_(torch.randn(param.size()).cuda() * noise_param)
+                            param.add_(torch.randn(param.size()).to(torch_device) * noise_param)
                         if noise_type == 'uniform':
-                            param.add_((torch.rand(param.size()).cuda() - 0.5) * 2 * noise_param)
+                            param.add_((torch.rand(param.size()).to(torch_device) - 0.5) * 2 * noise_param)
                 sim = classify_simulator(snn, log_dir=log_dir_temp + 'simulator', device=simulator_device)
                 
                 env.init_test()
