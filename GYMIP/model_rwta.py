@@ -20,7 +20,7 @@ class RWTAprob:
                 hid_num=250, hid_size=4,
                 remove_connection_pattern='none',       # 'none', 'hh', 'sa', 'hhsa', 'ha', 'sh'
                 optimizer_name='rmsprop', optimizer_learning_rate=0.01,
-                entropy_ratio=0.0, inference_noise=0.01,
+                entropy_ratio=0.0, inference_noise=0.02,
                 device=torch.device('cpu')):
         # Hyperparameters
         self.dim_state = input_size
@@ -429,7 +429,7 @@ class RWTAspike(RWTAprob):
                  hid_num=250, hid_size=4,
                  remove_connection_pattern='none',
                  optimizer_name='rmsprop', optimizer_learning_rate=0.01,
-                 entropy_ratio=0, inference_noise=0.01, device=torch.device('cpu'),
+                 entropy_ratio=0, inference_noise=0.02, device=torch.device('cpu'),
                  spk_response_window='uni', spk_full_time=200, spk_resp_time=50,
                  ):
         super().__init__(input_size, output_size, hid_num, hid_size,
