@@ -1,1 +1,1 @@
-Note: Please Copy the `env` folder in `GYMIP` here.
+Note: Please Copy the `env` folder in `SVPG2023/GYMIP` here.
