@@ -34,7 +34,6 @@ pip install ai2thor
 # ROBOTARM related
 # NOTE -- PyRep and CoppeliaSim are needed.
 #      -- Please follow https://github.com/stepjam/PyRep
-
 ```
 
 ### Dataset and environment
@@ -111,4 +110,4 @@ Replace `--task vizdoom` to `--task robotarm` to train on this task.
 
 ### Results
 
-You can find the training and testing records in `./log_text/` and `./log_model/`.
+You can find the training and testing records in `./log_text/` and `./log_model/`. Some outputs of the ANN2SNN method is stored in `./ann2snn/`.
