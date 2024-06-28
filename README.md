@@ -29,6 +29,12 @@ pip install snntorch==0.5.3
 pip install gym==0.26.2 mujoco==2.2.0
 # DOOM related
 pip install vizdoom==1.1.14
+# AI2THOR related
+pip install ai2thor
+# ROBOTARM related
+# NOTE -- PyRep and CoppeliaSim are needed.
+#      -- Please follow https://github.com/stepjam/PyRep
+
 ```
 
 ### Dataset and environment
@@ -44,6 +50,7 @@ pip install vizdoom==1.1.14
 * ANN2SNN relies on the training results from BP. The hyperparameters in ANN2SNN is used for finding the corresponding BP checkpoints in `./log_model/`.
 * Below are examples for running each method on each task.
 * For GYMIP, you may add `--alg reinforce` to switch to the REINFORCE algorithm.
+* For AI2THOR and ROBOTARM, an NVIDIA GPU and an X server (program) is needed. We recommend running on a Linux machine with NVIDIA GPU and a monitor attached. Running on a headless server may fail.
 
 ### MNIST
 
@@ -89,6 +96,18 @@ python run_PPO.py --task vizdoom --model snnbptt --cuda 0 --lr 0.0001 --entropy 
 # ANN2SNN
 python run_ANN2SNN.py --task vizdoom --model mlp3relu --cuda 0 --lr 0.0001 --entropy 0.02 --rwta_del_connection none --ignore_checkpoint
 ```
+
+### AI2THOR
+
+Similar to DOOM. The folder is `./AI2THOR/`.
+
+Replace `--task vizdoom` to `--task ai2thor` to train on this task.
+
+### ROBOTARM
+
+Similar to DOOM. The folder is `./ROBOTARM/`.
+
+Replace `--task vizdoom` to `--task robotarm` to train on this task.
 
 ### Results
 
