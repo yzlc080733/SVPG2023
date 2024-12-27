@@ -1,10 +1,14 @@
 # Code for Spiking Variarional Policy Gradient (SVPG)
 
-This is the code repository for implementing the experiments in the journal paper.
+This is the code repository for implementing the experiments in the journal paper:
+
+Spiking Variational Policy Gradient for Brain Inspired Reinforcement Learning
+
+[Link to paper](https://doi.org/10.1109/TPAMI.2024.3511936)
 
 An old version of the code is at [GitHub - yzlc080733/BMVC2022_SVPG](https://github.com/yzlc080733/BMVC2022_SVPG), which corresponds to the BMVC 2022 conference paper.
 
-Three RL tasks are used, namely MNIST, GYMIP, and DOOM.
+Five RL tasks are used, namely MNIST, GYMIP, DOOM, AI2THOR, and ROBOTARM.
 
 ## Set up
 
